@@ -1,0 +1,66 @@
+Lab instructions:
+1. Launch an EC2 Instance (EKS Bootstrap)
+2. Install AWSCLI latest version
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+unzip awscliv2.zip
+sudo ./aws/install
+
+3. Setup kubectl
+a. Download kubectl latest version
+https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/
+curl -LO "https://dl.k8s.io/release/$(curl -L -s
+https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+b. Grant execution permissions to kubectl executable
+chmod +x kubectl
+c. Move kubectl onto /usr/local/bin
+mv kubectl /usr/local/bin
+c. Test that your kubectl installation was successful
+kubectl
+
+4. Setup eksctl
+a. Download and extract the latest release
+curl --silent --location
+"https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -
+s)_amd64.tar.gz" | tar xz -C /tmp
+
+b. Move the extracted binary to /usr/local/bin
+sudo mv /tmp/eksctl /usr/local/bin
+
+c. Test that your eksclt installation was successful
+
+eksctl version
+5. Create an IAM Role and attach it to EC2 instance
+Note: create IAM user with programmatic access if your bootstrap system is outside of AWS
+IAM user should have access to
+IAMFullAccess
+EC2FullAccess
+VPCFullAccess
+AWSCloudFormationFullAccess
+
+Attach the below custom policy as well (ekscustom)
+
+{
+"Version": "2012-10-17",
+"Statement": [
+{
+"Sid": "eksadministrator",
+"Effect": "Allow",
+"Action": "eks:*",
+"Resource": "*"
+}
+]
+}
+
+6. Create your cluster and nodes
+
+eksctl create cluster --name test-cluster --region us-west-2 --node-type t2.small \
+7. Validate your cluster
+
+eksctl get cluster --region <region_name>
+kubectl get nodes
+8. Create deployment and Service in the Cluster
+kubectl create deployment tomcat-deployment --image=tomcat:8.0
+kubectl expose deployment tomcat-deployment --port=8080 --type=LoadBalancer
+loadbalancerendpoint:8080
+7. Delete the cluster
+eksctl delete cluster <cluster_name> --region <region_name>
